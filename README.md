@@ -1,8 +1,10 @@
-# Weather Forecast App
+# Vayora
 
-A responsive weather forecasting web application that displays current conditions and a five-day forecast for cities worldwide.
+**Weather around you.**
 
-![Weather Forecast App preview](assets/weather-app-preview.jpg)
+Vayora is a responsive weather web application that displays current conditions and a five-day forecast for cities worldwide.
+
+![Vayora weather app preview](assets/weather-app-preview.jpg)
 
 ## Live demo
 
