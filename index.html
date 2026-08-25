@@ -21,13 +21,31 @@
         <input id="city-input" name="city" type="search" placeholder="Try Bengaluru" autocomplete="off" required>
         <button type="submit">Search</button>
       </form>
+      <div class="secondary-actions">
+        <button id="location-button" class="location-button" type="button">⌖ Use my location</button>
+        <button id="open-saved-button" class="open-saved-button" type="button">★ Saved <span id="saved-count">0</span></button>
+      </div>
+
+      <section class="quick-locations" aria-label="Quick locations">
+        <div id="recent-section" hidden>
+          <h2>Recent searches</h2>
+          <div id="recent-list" class="city-chips"></div>
+        </div>
+      </section>
 
       <p id="status" class="status" aria-live="polite">Enter a city to begin.</p>
 
       <article id="weather-card" class="weather-card" hidden>
         <div>
-          <p id="location" class="location"></p>
-          <p id="condition" class="condition"></p>
+          <div class="location-heading">
+            <p id="location" class="location"></p>
+            <button id="save-city-button" class="save-city-button" type="button">☆ Save city</button>
+          </div>
+          <p class="condition-line">
+            <span id="current-icon" class="current-icon" aria-hidden="true"></span>
+            <span id="condition" class="condition"></span>
+          </p>
+          <p id="local-time" class="local-time"></p>
         </div>
         <p class="temperature"><span id="temperature"></span><span aria-hidden="true">°C</span></p>
         <dl class="details">
@@ -46,12 +64,30 @@
         </dl>
       </article>
 
+      <aside id="advisory" class="advisory" aria-live="polite" hidden>
+        <span id="advisory-icon" class="advisory-icon" aria-hidden="true"></span>
+        <p id="advisory-message"></p>
+      </aside>
+
       <section id="forecast-section" class="forecast-section" aria-labelledby="forecast-title" hidden>
         <h2 id="forecast-title">Five-day forecast</h2>
         <div id="forecast-list" class="forecast-list"></div>
       </section>
     </section>
   </main>
+
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+  <aside id="saved-drawer" class="saved-drawer" aria-labelledby="saved-drawer-title" aria-hidden="true">
+    <div class="drawer-header">
+      <div>
+        <p class="eyebrow">Quick access</p>
+        <h2 id="saved-drawer-title">Saved cities</h2>
+      </div>
+      <button id="close-saved-button" class="close-saved-button" type="button" aria-label="Close saved cities">×</button>
+    </div>
+    <p id="saved-empty" class="saved-empty">Save up to three cities for one-click weather updates.</p>
+    <div id="saved-list" class="saved-list"></div>
+  </aside>
 
   <script src="app.js" defer></script>
 </body>
