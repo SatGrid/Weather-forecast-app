@@ -38,6 +38,7 @@ let temperatureUnit = localStorage.getItem(TEMPERATURE_UNIT_KEY) === "f" ? "f" :
 let latestWeather = null;
 let globeInstance = null;
 let globeResizeObserver = null;
+let globeSelecting = false;
 
 const elements = {
   location: document.querySelector("#location"),
@@ -367,6 +368,12 @@ async function loadWeather(place) {
   showWeather(place, weather.current);
   showForecast(weather.daily);
   showAdvisory(weather.current, weather.hourly);
+  weatherCard.classList.remove("weather-reveal");
+  forecastSection.classList.remove("weather-reveal");
+  requestAnimationFrame(() => {
+    weatherCard.classList.add("weather-reveal");
+    forecastSection.classList.add("weather-reveal");
+  });
   statusMessage.textContent = `Updated for ${weather.timezone}.`;
 }
 
@@ -410,26 +417,43 @@ function initializeGlobe() {
 
   try {
     globeInstance = new Globe(globeContainer)
-      .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
-      .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
+      .globeImageUrl("assets/earth-blue-marble.jpg")
       .backgroundColor("rgba(0,0,0,0)")
       .atmosphereColor("#70e1c1")
-      .atmosphereAltitude(0.18)
-      .showGraticules(true)
+      .atmosphereAltitude(0.15)
+      .ringColor(() => ["#70e1c1", "#70e1c100"])
+      .ringMaxRadius(4)
+      .ringPropagationSpeed(2)
+      .ringRepeatPeriod(550)
       .onGlobeClick(async ({ lat, lng }) => {
+        if (globeSelecting) return;
+        globeSelecting = true;
+        globeInstance.enablePointerInteraction(false);
+        globeInstance.controls().autoRotate = false;
+        globeInstance.ringsData([{ lat, lng }]);
+        globeInstance.pointOfView({ lat, lng, altitude: 0.55 }, 1400);
         globeStatus.classList.remove("error");
-        globeStatus.textContent = "Finding this location and its weather…";
-        let displayName = `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
+        globeStatus.textContent = "Flying to your selected spot…";
 
         try {
-          displayName = await getLocationName(lat, lng);
-        } catch {
-          // Coordinates remain a useful fallback for oceans and unnamed areas.
-        }
+          const placeNamePromise = getLocationName(lat, lng).catch(
+            () => `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`
+          );
+          const [displayName] = await Promise.all([
+            placeNamePromise,
+            new Promise((resolve) => setTimeout(resolve, 1500)),
+          ]);
 
-        globeDialog.close();
-        await loadSavedPlace({ latitude: lat, longitude: lng, displayName }, { addToRecent: true });
-        globeStatus.textContent = "Click the globe to load weather.";
+          globeStatus.textContent = `Opening the sky over ${displayName}…`;
+          await new Promise((resolve) => setTimeout(resolve, 350));
+          globeDialog.close();
+          await loadSavedPlace({ latitude: lat, longitude: lng, displayName }, { addToRecent: true });
+        } finally {
+          globeInstance.ringsData([]);
+          globeInstance.enablePointerInteraction(true);
+          globeSelecting = false;
+          globeStatus.textContent = "Click the globe to load weather.";
+        }
       });
 
     globeInstance.controls().autoRotate = true;
@@ -583,7 +607,13 @@ openGlobeButton.addEventListener("click", () => {
   globeStatus.classList.remove("error");
   globeStatus.textContent = "Click the globe to load weather.";
   globeDialog.showModal();
-  requestAnimationFrame(initializeGlobe);
+  requestAnimationFrame(() => {
+    initializeGlobe();
+    if (globeInstance) {
+      globeInstance.pointOfView({ ...globeInstance.pointOfView(), altitude: 2.1 }, 700);
+      globeInstance.controls().autoRotate = true;
+    }
+  });
 });
 
 closeGlobeButton.addEventListener("click", () => globeDialog.close());

@@ -41,6 +41,7 @@ Vayora is a responsive weather web application that displays current conditions 
 - [Open-Meteo Forecast API](https://open-meteo.com/en/docs) for current weather and forecasts
 - [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api) for city search
 - [BigDataCloud reverse geocoding](https://www.bigdatacloud.com/docs/api-domains) for current-location names
+- [NASA Blue Marble](https://visibleearth.nasa.gov/collection/1484/blue-marble) imagery for the high-resolution 3D Earth texture
 
 No API key is required for this project.
 
