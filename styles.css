@@ -73,6 +73,11 @@ button, input { font: inherit; }
   text-transform: uppercase;
 }
 
+.header-controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.header-controls .eyebrow { margin-bottom: 0; }
+.unit-toggle { min-width: 52px; padding: 8px 12px; border: 1px solid #36516c; border-radius: 999px; background: rgba(255, 255, 255, 0.06); color: #dce9f4; }
+.unit-toggle:hover { background: rgba(112, 225, 193, 0.14); }
+
 h1 {
   margin: 0;
   font-size: clamp(2.4rem, 8vw, 4.8rem);

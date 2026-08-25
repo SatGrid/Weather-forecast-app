@@ -6,6 +6,7 @@ const forecastSection = document.querySelector("#forecast-section");
 const forecastList = document.querySelector("#forecast-list");
 const searchButton = form.querySelector("button");
 const locationButton = document.querySelector("#location-button");
+const unitToggle = document.querySelector("#unit-toggle");
 const locationResults = document.querySelector("#location-results");
 const saveCityButton = document.querySelector("#save-city-button");
 const openSavedButton = document.querySelector("#open-saved-button");
@@ -23,10 +24,13 @@ const advisoryMessage = document.querySelector("#advisory-message");
 
 const RECENT_CITIES_KEY = "weather-recent-cities";
 const SAVED_CITIES_KEY = "weather-saved-cities";
+const TEMPERATURE_UNIT_KEY = "weather-temperature-unit";
 let currentPlace = null;
 let drawerTrigger = null;
 let autocompleteTimer = null;
 let autocompleteController = null;
+let temperatureUnit = localStorage.getItem(TEMPERATURE_UNIT_KEY) === "f" ? "f" : "c";
+let latestWeather = null;
 
 const elements = {
   location: document.querySelector("#location"),
@@ -34,10 +38,25 @@ const elements = {
   condition: document.querySelector("#condition"),
   localTime: document.querySelector("#local-time"),
   temperature: document.querySelector("#temperature"),
+  temperatureUnit: document.querySelector("#temperature-unit"),
   feelsLike: document.querySelector("#feels-like"),
+  feelsUnit: document.querySelector("#feels-unit"),
   humidity: document.querySelector("#humidity"),
   windSpeed: document.querySelector("#wind-speed"),
 };
+
+function displayTemperature(celsius) {
+  return Math.round(temperatureUnit === "f" ? (celsius * 9 / 5) + 32 : celsius);
+}
+
+function updateUnitControl() {
+  const label = temperatureUnit === "c" ? "°C" : "°F";
+  const nextLabel = temperatureUnit === "c" ? "Fahrenheit" : "Celsius";
+  unitToggle.textContent = label;
+  unitToggle.setAttribute("aria-label", `Switch to ${nextLabel}`);
+  elements.temperatureUnit.textContent = label;
+  elements.feelsUnit.textContent = label;
+}
 
 const weatherDescriptions = {
   0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
@@ -248,8 +267,8 @@ function showForecast(daily) {
     );
     const description = weatherDescriptions[daily.weather_code[index]] ?? "Unavailable";
     const visual = getWeatherVisual(daily.weather_code[index]);
-    const high = Math.round(daily.temperature_2m_max[index]);
-    const low = Math.round(daily.temperature_2m_min[index]);
+    const high = displayTemperature(daily.temperature_2m_max[index]);
+    const low = displayTemperature(daily.temperature_2m_min[index]);
 
     return `
       <article class="forecast-day">
@@ -272,8 +291,8 @@ function showWeather(place, current) {
   elements.condition.textContent = weatherDescriptions[current.weather_code] ?? "Weather unavailable";
   elements.currentIcon.textContent = visual.icon;
   elements.localTime.textContent = `${formatLocalTime(current.time)} · ${isDay ? "Day" : "Night"}`;
-  elements.temperature.textContent = Math.round(current.temperature_2m);
-  elements.feelsLike.textContent = Math.round(current.apparent_temperature);
+  elements.temperature.textContent = displayTemperature(current.temperature_2m);
+  elements.feelsLike.textContent = displayTemperature(current.apparent_temperature);
   elements.humidity.textContent = current.relative_humidity_2m;
   elements.windSpeed.textContent = Math.round(current.wind_speed_10m);
   currentPlace = { ...place, displayName: area };
@@ -336,6 +355,7 @@ function showError(error) {
 
 async function loadWeather(place) {
   const weather = await getCurrentWeather(place.latitude, place.longitude);
+  latestWeather = { place, current: weather.current, daily: weather.daily };
   showWeather(place, weather.current);
   showForecast(weather.daily);
   showAdvisory(weather.current, weather.hourly);
@@ -496,4 +516,16 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+unitToggle.addEventListener("click", () => {
+  temperatureUnit = temperatureUnit === "c" ? "f" : "c";
+  localStorage.setItem(TEMPERATURE_UNIT_KEY, temperatureUnit);
+  updateUnitControl();
+
+  if (latestWeather) {
+    showWeather(latestWeather.place, latestWeather.current);
+    showForecast(latestWeather.daily);
+  }
+});
+
+updateUnitControl();
 renderQuickLocations();
