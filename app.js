@@ -7,6 +7,11 @@ const forecastList = document.querySelector("#forecast-list");
 const searchButton = form.querySelector("button");
 const locationButton = document.querySelector("#location-button");
 const unitToggle = document.querySelector("#unit-toggle");
+const openGlobeButton = document.querySelector("#open-globe-button");
+const closeGlobeButton = document.querySelector("#close-globe-button");
+const globeDialog = document.querySelector("#globe-dialog");
+const globeContainer = document.querySelector("#globe-container");
+const globeStatus = document.querySelector("#globe-status");
 const locationResults = document.querySelector("#location-results");
 const saveCityButton = document.querySelector("#save-city-button");
 const openSavedButton = document.querySelector("#open-saved-button");
@@ -31,6 +36,8 @@ let autocompleteTimer = null;
 let autocompleteController = null;
 let temperatureUnit = localStorage.getItem(TEMPERATURE_UNIT_KEY) === "f" ? "f" : "c";
 let latestWeather = null;
+let globeInstance = null;
+let globeResizeObserver = null;
 
 const elements = {
   location: document.querySelector("#location"),
@@ -343,6 +350,7 @@ function formatLocalTime(isoLocalTime) {
 function setLoading(isLoading) {
   searchButton.disabled = isLoading;
   locationButton.disabled = isLoading;
+  openGlobeButton.disabled = isLoading;
   searchButton.textContent = isLoading ? "Loading…" : "Search";
 }
 
@@ -362,7 +370,7 @@ async function loadWeather(place) {
   statusMessage.textContent = `Updated for ${weather.timezone}.`;
 }
 
-async function loadSavedPlace(place) {
+async function loadSavedPlace(place, { addToRecent = false } = {}) {
   closeSavedDrawer();
   setLoading(true);
   locationResults.hidden = true;
@@ -374,10 +382,65 @@ async function loadSavedPlace(place) {
 
   try {
     await loadWeather(place);
+    if (addToRecent) addRecentCity(place);
   } catch (error) {
     showError(error);
   } finally {
     setLoading(false);
+  }
+}
+
+function sizeGlobe() {
+  if (!globeInstance) return;
+  globeInstance.width(globeContainer.clientWidth);
+  globeInstance.height(globeContainer.clientHeight);
+}
+
+function initializeGlobe() {
+  if (globeInstance) {
+    sizeGlobe();
+    return;
+  }
+
+  if (typeof Globe !== "function") {
+    globeStatus.textContent = "The 3D globe could not load. Check your internet connection or try another browser.";
+    globeStatus.classList.add("error");
+    return;
+  }
+
+  try {
+    globeInstance = new Globe(globeContainer)
+      .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
+      .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
+      .backgroundColor("rgba(0,0,0,0)")
+      .atmosphereColor("#70e1c1")
+      .atmosphereAltitude(0.18)
+      .showGraticules(true)
+      .onGlobeClick(async ({ lat, lng }) => {
+        globeStatus.classList.remove("error");
+        globeStatus.textContent = "Finding this location and its weather…";
+        let displayName = `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
+
+        try {
+          displayName = await getLocationName(lat, lng);
+        } catch {
+          // Coordinates remain a useful fallback for oceans and unnamed areas.
+        }
+
+        globeDialog.close();
+        await loadSavedPlace({ latitude: lat, longitude: lng, displayName }, { addToRecent: true });
+        globeStatus.textContent = "Click the globe to load weather.";
+      });
+
+    globeInstance.controls().autoRotate = true;
+    globeInstance.controls().autoRotateSpeed = 0.35;
+    globeInstance.controls().enableDamping = true;
+    sizeGlobe();
+    globeResizeObserver = new ResizeObserver(sizeGlobe);
+    globeResizeObserver.observe(globeContainer);
+  } catch {
+    globeStatus.textContent = "This device could not start the 3D globe. City search is still available.";
+    globeStatus.classList.add("error");
   }
 }
 
@@ -514,6 +577,18 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && savedDrawer.classList.contains("open")) {
     closeSavedDrawer();
   }
+});
+
+openGlobeButton.addEventListener("click", () => {
+  globeStatus.classList.remove("error");
+  globeStatus.textContent = "Click the globe to load weather.";
+  globeDialog.showModal();
+  requestAnimationFrame(initializeGlobe);
+});
+
+closeGlobeButton.addEventListener("click", () => globeDialog.close());
+globeDialog.addEventListener("click", (event) => {
+  if (event.target === globeDialog) globeDialog.close();
 });
 
 unitToggle.addEventListener("click", () => {

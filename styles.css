@@ -125,9 +125,10 @@ button {
 button:hover { background: #91ecd2; }
 button:disabled { cursor: wait; opacity: 0.65; }
 
-.secondary-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 10px; }
+.secondary-actions { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; margin-top: 10px; }
 
 .location-button,
+.open-globe-button,
 .open-saved-button {
   border: 1px solid #36516c;
   background: transparent;
@@ -135,6 +136,7 @@ button:disabled { cursor: wait; opacity: 0.65; }
 }
 
 .location-button:hover,
+.open-globe-button:hover,
 .open-saved-button:hover { background: rgba(255, 255, 255, 0.07); }
 .open-saved-button span { display: inline-grid; min-width: 1.45rem; height: 1.45rem; place-items: center; margin-left: 5px; border-radius: 999px; background: rgba(112, 225, 193, 0.16); color: #70e1c1; font-size: 0.75rem; }
 
@@ -159,6 +161,18 @@ button:disabled { cursor: wait; opacity: 0.65; }
 .close-saved-button:hover { background: rgba(255, 255, 255, 0.07); }
 .saved-empty { margin: 24px 0 0; color: #8fa8bf; line-height: 1.5; }
 .saved-list { display: grid; gap: 10px; margin-top: 24px; }
+
+.globe-dialog { width: min(94vw, 980px); max-width: none; padding: 0; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 24px; overflow: hidden; background: #07111f; color: #f7fbff; box-shadow: 0 30px 100px rgba(0, 0, 0, 0.65); }
+.globe-dialog::backdrop { background: rgba(0, 7, 15, 0.82); backdrop-filter: blur(6px); }
+.globe-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 22px 24px 16px; }
+.globe-header h2 { margin: 0; font-size: clamp(1.35rem, 4vw, 2rem); }
+.globe-header p:not(.eyebrow) { margin: 7px 0 0; color: #8fa8bf; }
+.close-globe-button { width: 42px; height: 42px; flex: none; padding: 0; border: 1px solid #36516c; background: transparent; color: #dce9f4; font-size: 1.55rem; }
+.close-globe-button:hover { background: rgba(255, 255, 255, 0.07); }
+.globe-container { width: 100%; height: min(68vh, 650px); cursor: grab; background: radial-gradient(circle, #102f53 0, #030812 68%); }
+.globe-container:active { cursor: grabbing; }
+.globe-status { min-height: 22px; margin: 0; padding: 13px 24px 17px; color: #aec1d4; }
+.globe-status.error { color: #ffaaa3; }
 
 .status {
   min-height: 24px;
@@ -258,4 +272,6 @@ dd { margin: 5px 0 0; font-weight: 750; }
   .details { grid-template-columns: 1fr; }
   .forecast-list { grid-template-columns: repeat(2, 1fr); }
   .location-heading { align-items: flex-start; flex-direction: column; }
+  .globe-dialog { width: 100vw; height: 100dvh; border: 0; border-radius: 0; }
+  .globe-container { height: calc(100dvh - 175px); }
 }

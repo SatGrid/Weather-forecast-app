@@ -13,6 +13,7 @@ Vayora is a responsive weather web application that displays current conditions 
 ## Features
 
 - Search weather by city name
+- Explore an interactive 3D Earth and click any location for its weather
 - Use the device's current location
 - Display local time and day/night status
 - View temperature, feels-like temperature, humidity, and wind speed
@@ -32,6 +33,7 @@ Vayora is a responsive weather web application that displays current conditions 
 - Fetch API and async/await
 - Browser Geolocation API
 - Browser localStorage
+- Globe.GL and WebGL
 - GitHub Pages
 
 ## APIs
