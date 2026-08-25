@@ -114,9 +114,45 @@ button:disabled { cursor: wait; opacity: 0.65; }
 dt { color: #8fa8bf; font-size: 0.8rem; }
 dd { margin: 5px 0 0; font-weight: 750; }
 
+.forecast-section {
+  margin-top: 28px;
+}
+
+.forecast-section h2 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
+.forecast-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.forecast-day {
+  padding: 14px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.forecast-day-name,
+.forecast-condition,
+.forecast-temperature {
+  margin: 0;
+}
+
+.forecast-day-name { color: #aec1d4; font-size: 0.82rem; }
+.forecast-condition { min-height: 34px; margin-top: 8px; color: #8fa8bf; font-size: 0.72rem; }
+.forecast-temperature { margin-top: 8px; font-weight: 800; }
+.forecast-low { color: #8fa8bf; font-weight: 600; }
+
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
 @media (max-width: 520px) {
   .search-form { flex-direction: column; }
   .details { grid-template-columns: 1fr; }
+  .forecast-list { grid-template-columns: repeat(2, 1fr); }
 }

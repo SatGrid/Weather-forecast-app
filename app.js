@@ -2,6 +2,8 @@ const form = document.querySelector("#search-form");
 const cityInput = document.querySelector("#city-input");
 const statusMessage = document.querySelector("#status");
 const weatherCard = document.querySelector("#weather-card");
+const forecastSection = document.querySelector("#forecast-section");
+const forecastList = document.querySelector("#forecast-list");
 const searchButton = form.querySelector("button");
 
 const elements = {
@@ -42,11 +44,34 @@ async function getCurrentWeather(latitude, longitude) {
   url.searchParams.set("latitude", latitude);
   url.searchParams.set("longitude", longitude);
   url.searchParams.set("current", "temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m");
+  url.searchParams.set("daily", "weather_code,temperature_2m_max,temperature_2m_min");
+  url.searchParams.set("forecast_days", "5");
   url.searchParams.set("timezone", "auto");
 
   const response = await fetch(url);
   if (!response.ok) throw new Error("Could not load the weather right now.");
   return response.json();
+}
+
+function showForecast(daily) {
+  forecastList.innerHTML = daily.time.map((date, index) => {
+    const dayName = new Intl.DateTimeFormat("en", { weekday: "short" }).format(
+      new Date(`${date}T12:00:00`)
+    );
+    const description = weatherDescriptions[daily.weather_code[index]] ?? "Unavailable";
+    const high = Math.round(daily.temperature_2m_max[index]);
+    const low = Math.round(daily.temperature_2m_min[index]);
+
+    return `
+      <article class="forecast-day">
+        <p class="forecast-day-name">${index === 0 ? "Today" : dayName}</p>
+        <p class="forecast-condition">${description}</p>
+        <p class="forecast-temperature">${high}° <span class="forecast-low">${low}°</span></p>
+      </article>
+    `;
+  }).join("");
+
+  forecastSection.hidden = false;
 }
 
 function showWeather(place, current) {
@@ -72,6 +97,7 @@ form.addEventListener("submit", async (event) => {
 
   setLoading(true);
   weatherCard.hidden = true;
+  forecastSection.hidden = true;
   statusMessage.classList.remove("error");
   statusMessage.textContent = `Finding weather for ${city}…`;
 
@@ -79,6 +105,7 @@ form.addEventListener("submit", async (event) => {
     const place = await getCoordinates(city);
     const weather = await getCurrentWeather(place.latitude, place.longitude);
     showWeather(place, weather.current);
+    showForecast(weather.daily);
     statusMessage.textContent = `Updated for ${weather.timezone}.`;
   } catch (error) {
     statusMessage.textContent = error.message;
