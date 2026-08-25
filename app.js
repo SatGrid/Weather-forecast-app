@@ -25,6 +25,8 @@ const RECENT_CITIES_KEY = "weather-recent-cities";
 const SAVED_CITIES_KEY = "weather-saved-cities";
 let currentPlace = null;
 let drawerTrigger = null;
+let autocompleteTimer = null;
+let autocompleteController = null;
 
 const elements = {
   location: document.querySelector("#location"),
@@ -161,13 +163,13 @@ function getWeatherVisual(code, isDay = true) {
   return { icon: "🌡️", theme: "cloudy" };
 }
 
-async function getLocationMatches(city) {
+async function getLocationMatches(city, signal) {
   const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
   url.searchParams.set("name", city);
   url.searchParams.set("count", "6");
   url.searchParams.set("language", "en");
 
-  const response = await fetch(url);
+  const response = await fetch(url, { signal });
   if (!response.ok) throw new Error("Could not reach the location service.");
 
   const data = await response.json();
@@ -176,7 +178,7 @@ async function getLocationMatches(city) {
   return data.results;
 }
 
-function showLocationChoices(places) {
+function showLocationChoices(places, { focusFirst = false } = {}) {
   const buttons = places.map((place) => {
     const button = document.createElement("button");
     const region = [place.admin1, place.country].filter(Boolean).join(", ");
@@ -204,7 +206,7 @@ function showLocationChoices(places) {
 
   locationResults.replaceChildren(...buttons);
   locationResults.hidden = false;
-  buttons[0]?.focus();
+  if (focusFirst) buttons[0]?.focus();
 }
 
 async function getLocationName(latitude, longitude) {
@@ -361,6 +363,8 @@ async function loadSavedPlace(place) {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  clearTimeout(autocompleteTimer);
+  autocompleteController?.abort();
   const city = cityInput.value.trim();
   if (!city) return;
 
@@ -377,13 +381,45 @@ form.addEventListener("submit", async (event) => {
       await loadWeather(places[0]);
       addRecentCity(places[0]);
     } else {
-      showLocationChoices(places);
+      showLocationChoices(places, { focusFirst: true });
       statusMessage.textContent = `Choose the correct location for “${city}”.`;
     }
   } catch (error) {
     showError(error);
   } finally {
     setLoading(false);
+  }
+});
+
+cityInput.addEventListener("input", () => {
+  clearTimeout(autocompleteTimer);
+  autocompleteController?.abort();
+  const query = cityInput.value.trim();
+
+  if (query.length < 2) {
+    locationResults.hidden = true;
+    return;
+  }
+
+  autocompleteTimer = setTimeout(async () => {
+    autocompleteController = new AbortController();
+
+    try {
+      const places = await getLocationMatches(query, autocompleteController.signal);
+      if (cityInput.value.trim() === query) showLocationChoices(places);
+    } catch (error) {
+      if (error.name !== "AbortError") locationResults.hidden = true;
+    }
+  }, 300);
+});
+
+cityInput.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") locationResults.hidden = true;
+});
+
+document.addEventListener("click", (event) => {
+  if (!form.contains(event.target) && !locationResults.contains(event.target)) {
+    locationResults.hidden = true;
   }
 });
 
