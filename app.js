@@ -6,6 +6,7 @@ const forecastSection = document.querySelector("#forecast-section");
 const forecastList = document.querySelector("#forecast-list");
 const searchButton = form.querySelector("button");
 const locationButton = document.querySelector("#location-button");
+const locationResults = document.querySelector("#location-results");
 const saveCityButton = document.querySelector("#save-city-button");
 const openSavedButton = document.querySelector("#open-saved-button");
 const closeSavedButton = document.querySelector("#close-saved-button");
@@ -58,9 +59,13 @@ function writeStorage(key, value) {
 }
 
 function getPlaceLabel(place) {
-  return place.displayName ?? (
-    place.admin1 ? `${place.name}, ${place.admin1}, ${place.country}` : `${place.name}, ${place.country}`
-  );
+  if (place.displayName) return place.displayName;
+
+  return [place.name, place.admin1, place.country]
+    .filter((part, index, parts) => part && parts.findIndex(
+      (candidate) => candidate?.toLowerCase() === part.toLowerCase()
+    ) === index)
+    .join(", ");
 }
 
 function makeCityChip(label, onClick) {
@@ -101,12 +106,15 @@ function renderQuickLocations() {
   const recentCities = readStorage(RECENT_CITIES_KEY);
 
   savedList.replaceChildren(...savedCities.map(makeSavedCityChip));
-  recentList.replaceChildren(...recentCities.map((city) =>
-    makeCityChip(city, () => {
-      cityInput.value = city;
-      form.requestSubmit();
-    })
-  ));
+  recentList.replaceChildren(...recentCities.map((item) => {
+    if (typeof item === "string") {
+      return makeCityChip(item, () => {
+        cityInput.value = item;
+        form.requestSubmit();
+      });
+    }
+    return makeCityChip(getPlaceLabel(item), () => loadSavedPlace(item));
+  }));
 
   savedCount.textContent = savedCities.length;
   savedEmpty.hidden = savedCities.length !== 0;
@@ -128,10 +136,11 @@ function closeSavedDrawer() {
   drawerTrigger?.focus();
 }
 
-function addRecentCity(city) {
+function addRecentCity(place) {
+  const label = getPlaceLabel(place);
   const recentCities = readStorage(RECENT_CITIES_KEY)
-    .filter((item) => item.toLowerCase() !== city.toLowerCase());
-  writeStorage(RECENT_CITIES_KEY, [city, ...recentCities].slice(0, 5));
+    .filter((item) => (typeof item === "string" ? item : getPlaceLabel(item)).toLowerCase() !== label.toLowerCase());
+  writeStorage(RECENT_CITIES_KEY, [{ ...place, displayName: label }, ...recentCities].slice(0, 5));
   renderQuickLocations();
 }
 
@@ -152,10 +161,10 @@ function getWeatherVisual(code, isDay = true) {
   return { icon: "🌡️", theme: "cloudy" };
 }
 
-async function getCoordinates(city) {
+async function getLocationMatches(city) {
   const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
   url.searchParams.set("name", city);
-  url.searchParams.set("count", "1");
+  url.searchParams.set("count", "6");
   url.searchParams.set("language", "en");
 
   const response = await fetch(url);
@@ -164,7 +173,38 @@ async function getCoordinates(city) {
   const data = await response.json();
   if (!data.results?.length) throw new Error("City not found. Check the spelling and try again.");
 
-  return data.results[0];
+  return data.results;
+}
+
+function showLocationChoices(places) {
+  const buttons = places.map((place) => {
+    const button = document.createElement("button");
+    const region = [place.admin1, place.country].filter(Boolean).join(", ");
+    button.type = "button";
+    button.className = "location-result";
+    button.textContent = place.name;
+    const details = document.createElement("span");
+    details.textContent = region;
+    button.append(details);
+    button.addEventListener("click", async () => {
+      locationResults.hidden = true;
+      setLoading(true);
+      statusMessage.textContent = `Loading ${getPlaceLabel(place)}…`;
+      try {
+        await loadWeather(place);
+        addRecentCity(place);
+      } catch (error) {
+        showError(error);
+      } finally {
+        setLoading(false);
+      }
+    });
+    return button;
+  });
+
+  locationResults.replaceChildren(...buttons);
+  locationResults.hidden = false;
+  buttons[0]?.focus();
 }
 
 async function getLocationName(latitude, longitude) {
@@ -303,6 +343,7 @@ async function loadWeather(place) {
 async function loadSavedPlace(place) {
   closeSavedDrawer();
   setLoading(true);
+  locationResults.hidden = true;
   weatherCard.hidden = true;
   forecastSection.hidden = true;
   advisory.hidden = true;
@@ -331,9 +372,14 @@ form.addEventListener("submit", async (event) => {
   statusMessage.textContent = `Finding weather for ${city}…`;
 
   try {
-    const place = await getCoordinates(city);
-    await loadWeather(place);
-    addRecentCity(place.name);
+    const places = await getLocationMatches(city);
+    if (places.length === 1) {
+      await loadWeather(places[0]);
+      addRecentCity(places[0]);
+    } else {
+      showLocationChoices(places);
+      statusMessage.textContent = `Choose the correct location for “${city}”.`;
+    }
   } catch (error) {
     showError(error);
   } finally {

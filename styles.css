@@ -101,6 +101,12 @@ input {
 
 input:focus { border-color: #70e1c1; }
 
+.location-results { display: grid; gap: 6px; margin-top: 8px; padding: 8px; border: 1px solid #36516c; border-radius: 14px; background: #0c1d2f; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28); }
+.location-results[hidden] { display: none; }
+.location-result { width: 100%; padding: 11px 12px; border: 0; border-radius: 9px; background: transparent; color: #dce9f4; text-align: left; font-weight: 650; }
+.location-result:hover, .location-result:focus-visible { background: rgba(112, 225, 193, 0.12); outline: none; }
+.location-result span { display: block; margin-top: 3px; color: #8fa8bf; font-size: 0.75rem; font-weight: 500; }
+
 button {
   padding: 14px 20px;
   border: 0;
