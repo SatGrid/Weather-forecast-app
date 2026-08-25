@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Search for the current weather in any city.">
+  <title>Weather Forecast</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <section class="weather-panel" aria-labelledby="page-title">
+      <header>
+        <p class="eyebrow">Weather dashboard</p>
+        <h1 id="page-title">How's the sky?</h1>
+        <p class="intro">Search a city to see its current weather.</p>
+      </header>
+
+      <form id="search-form" class="search-form" role="search">
+        <label class="sr-only" for="city-input">City name</label>
+        <input id="city-input" name="city" type="search" placeholder="Try Bengaluru" autocomplete="off" required>
+        <button type="submit">Search</button>
+      </form>
+
+      <p id="status" class="status" aria-live="polite">Enter a city to begin.</p>
+
+      <article id="weather-card" class="weather-card" hidden>
+        <div>
+          <p id="location" class="location"></p>
+          <p id="condition" class="condition"></p>
+        </div>
+        <p class="temperature"><span id="temperature"></span><span aria-hidden="true">°C</span></p>
+        <dl class="details">
+          <div>
+            <dt>Feels like</dt>
+            <dd><span id="feels-like"></span>°C</dd>
+          </div>
+          <div>
+            <dt>Humidity</dt>
+            <dd><span id="humidity"></span>%</dd>
+          </div>
+          <div>
+            <dt>Wind</dt>
+            <dd><span id="wind-speed"></span> km/h</dd>
+          </div>
+        </dl>
+      </article>
+    </section>
+  </main>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
