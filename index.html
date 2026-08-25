@@ -29,7 +29,6 @@
       <div id="location-results" class="location-results" aria-label="Matching locations" hidden></div>
       <div class="secondary-actions">
         <button id="location-button" class="location-button" type="button">⌖ Use my location</button>
-        <button id="open-globe-button" class="open-globe-button" type="button">◎ Explore globe</button>
         <button id="open-saved-button" class="open-saved-button" type="button">★ Saved <span id="saved-count">0</span></button>
       </div>
 
@@ -39,6 +38,15 @@
           <div id="recent-list" class="city-chips"></div>
         </div>
       </section>
+
+      <button id="open-globe-button" class="globe-launch" type="button">
+        <span class="globe-launch-icon" aria-hidden="true">◎</span>
+        <span>
+          <strong>Spin &amp; Discover</strong>
+          <small>Pick any spot. See what the sky is doing.</small>
+        </span>
+        <span class="globe-launch-arrow" aria-hidden="true">→</span>
+      </button>
 
       <p id="status" class="status" aria-live="polite">Enter a city to begin.</p>
 
@@ -100,8 +108,8 @@
     <div class="globe-header">
       <div>
         <p class="eyebrow">Explore Vayora</p>
-        <h2 id="globe-title">Pick anywhere on Earth</h2>
-        <p>Drag to rotate, scroll to zoom, then select a location.</p>
+        <h2 id="globe-title">Where should we go?</h2>
+        <p>Spin, zoom, and pick a spot to discover its weather.</p>
       </div>
       <button id="close-globe-button" class="close-globe-button" type="button" aria-label="Close globe">×</button>
     </div>
