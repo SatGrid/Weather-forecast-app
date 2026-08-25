@@ -196,6 +196,7 @@ dt { color: #8fa8bf; font-size: 0.8rem; }
 dd { margin: 5px 0 0; font-weight: 750; }
 
 .advisory { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 14px 16px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; background: rgba(255, 255, 255, 0.07); }
+.advisory[hidden] { display: none; }
 .advisory p { margin: 0; color: #e8f1f8; font-size: 0.9rem; }
 .advisory-icon { flex: none; font-size: 1.7rem; transform-origin: center; }
 .advisory.hot .advisory-icon { animation: gentle-pulse 1.8s ease-in-out infinite; }

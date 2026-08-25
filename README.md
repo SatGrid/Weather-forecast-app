@@ -2,6 +2,8 @@
 
 A responsive weather forecasting web application that displays current conditions and a five-day forecast for cities worldwide.
 
+![Weather Forecast App preview](assets/weather-app-preview.jpg)
+
 ## Live demo
 
 [View the deployed application](https://satgrid.github.io/Weather-forecast-app/)
