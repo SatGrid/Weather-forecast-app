@@ -23,7 +23,6 @@ const savedEmpty = document.querySelector("#saved-empty");
 const savedList = document.querySelector("#saved-list");
 const recentSection = document.querySelector("#recent-section");
 const recentList = document.querySelector("#recent-list");
-const clearRecentButton = document.querySelector("#clear-recent-button");
 const advisory = document.querySelector("#advisory");
 const advisoryIcon = document.querySelector("#advisory-icon");
 const advisoryMessage = document.querySelector("#advisory-message");
@@ -131,20 +130,41 @@ function makeSavedCityChip(place) {
   return wrapper;
 }
 
+function makeRecentCityChip(item) {
+  const wrapper = document.createElement("span");
+  wrapper.className = "recent-city";
+  const label = typeof item === "string" ? item : getPlaceLabel(item);
+  const openButton = makeCityChip(label, () => {
+    if (typeof item === "string") {
+      cityInput.value = item;
+      form.requestSubmit();
+    } else {
+      loadSavedPlace(item);
+    }
+  });
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.className = "remove-recent";
+  removeButton.textContent = "×";
+  removeButton.setAttribute("aria-label", `Remove ${label} from recent searches`);
+  removeButton.addEventListener("click", () => {
+    const remaining = readStorage(RECENT_CITIES_KEY).filter((recentItem) => {
+      const recentLabel = typeof recentItem === "string" ? recentItem : getPlaceLabel(recentItem);
+      return recentLabel.toLowerCase() !== label.toLowerCase();
+    });
+    writeStorage(RECENT_CITIES_KEY, remaining);
+    renderQuickLocations();
+  });
+  wrapper.append(openButton, removeButton);
+  return wrapper;
+}
+
 function renderQuickLocations() {
   const savedCities = readStorage(SAVED_CITIES_KEY);
   const recentCities = readStorage(RECENT_CITIES_KEY);
 
   savedList.replaceChildren(...savedCities.map(makeSavedCityChip));
-  recentList.replaceChildren(...recentCities.map((item) => {
-    if (typeof item === "string") {
-      return makeCityChip(item, () => {
-        cityInput.value = item;
-        form.requestSubmit();
-      });
-    }
-    return makeCityChip(getPlaceLabel(item), () => loadSavedPlace(item));
-  }));
+  recentList.replaceChildren(...recentCities.map(makeRecentCityChip));
 
   savedCount.textContent = savedCities.length;
   savedEmpty.hidden = savedCities.length !== 0;
@@ -598,12 +618,6 @@ saveCityButton.addEventListener("click", () => {
 openSavedButton.addEventListener("click", openSavedDrawer);
 closeSavedButton.addEventListener("click", closeSavedDrawer);
 drawerBackdrop.addEventListener("click", closeSavedDrawer);
-clearRecentButton.addEventListener("click", () => {
-  localStorage.removeItem(RECENT_CITIES_KEY);
-  renderQuickLocations();
-  statusMessage.classList.remove("error");
-  statusMessage.textContent = "Recent searches cleared.";
-});
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && savedDrawer.classList.contains("open")) {
     closeSavedDrawer();

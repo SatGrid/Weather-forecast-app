@@ -140,11 +140,11 @@ button:disabled { cursor: wait; opacity: 0.65; }
 
 .quick-locations { display: grid; gap: 14px; margin-top: 18px; }
 .quick-locations h2 { margin: 0 0 8px; color: #8fa8bf; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
-.recent-heading { display: flex; align-items: center; justify-content: space-between; }
-.recent-heading h2 { margin-bottom: 8px; }
-.clear-recent-button { width: 26px; height: 26px; padding: 0; border: 1px solid #36516c; border-radius: 50%; background: transparent; color: #8fa8bf; font-size: 1rem; line-height: 1; }
-.clear-recent-button:hover { border-color: #ffaaa3; background: rgba(255, 170, 163, 0.1); color: #ffaaa3; }
 .city-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.recent-city { display: inline-flex; align-items: stretch; border: 1px solid #36516c; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, 0.05); }
+.recent-city .city-chip { border: 0; border-radius: 0; background: transparent; }
+.remove-recent { padding: 6px 9px 7px 7px; border: 0; border-radius: 0; background: transparent; color: #8fa8bf; font-size: 1rem; line-height: 1; }
+.remove-recent:hover { background: transparent; color: #ffaaa3; }
 .saved-city { display: flex; align-items: stretch; width: 100%; border: 1px solid #36516c; border-radius: 14px; overflow: hidden; background: rgba(255, 255, 255, 0.05); }
 .city-chip { padding: 7px 11px; border: 1px solid #36516c; border-radius: 999px; background: rgba(255, 255, 255, 0.05); color: #dce9f4; font-size: 0.82rem; font-weight: 650; }
 .city-chip:hover { background: rgba(112, 225, 193, 0.14); }
