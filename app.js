@@ -23,6 +23,7 @@ const savedEmpty = document.querySelector("#saved-empty");
 const savedList = document.querySelector("#saved-list");
 const recentSection = document.querySelector("#recent-section");
 const recentList = document.querySelector("#recent-list");
+const clearRecentButton = document.querySelector("#clear-recent-button");
 const advisory = document.querySelector("#advisory");
 const advisoryIcon = document.querySelector("#advisory-icon");
 const advisoryMessage = document.querySelector("#advisory-message");
@@ -597,6 +598,12 @@ saveCityButton.addEventListener("click", () => {
 openSavedButton.addEventListener("click", openSavedDrawer);
 closeSavedButton.addEventListener("click", closeSavedDrawer);
 drawerBackdrop.addEventListener("click", closeSavedDrawer);
+clearRecentButton.addEventListener("click", () => {
+  localStorage.removeItem(RECENT_CITIES_KEY);
+  renderQuickLocations();
+  statusMessage.classList.remove("error");
+  statusMessage.textContent = "Recent searches cleared.";
+});
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && savedDrawer.classList.contains("open")) {
     closeSavedDrawer();
